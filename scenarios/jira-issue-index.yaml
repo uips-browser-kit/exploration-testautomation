@@ -1,0 +1,13 @@
+scenario_id: jira-issue-index
+app: jira
+env: cloud
+list_url: http://jira-cloud.local/issues
+detail_template: /browse/{id}
+expected_candidate_count: 20
+lookup:
+  source: api
+selection:
+  strategy: index
+  index: 3
+assertions:
+  url_contains: /browse/
