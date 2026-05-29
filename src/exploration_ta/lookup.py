@@ -36,3 +36,49 @@ def lookup_candidates_from_manifest(
                 candidates = [Candidate(id=c) for c in route.get("candidates", [])]
                 return LookupResult(source="manifest", candidates=candidates)
     raise ValueError(f"route not found in manifest: {app_id}/{env_id}/{route_id}")
+
+
+def fetch_manifest(manifest_url: str) -> dict:
+    with urllib.request.urlopen(manifest_url) as resp:
+        return json.loads(resp.read())
+
+
+def get_route_from_manifest(manifest: dict, app_id: str, env_id: str, route_id: str) -> dict:
+    for app in manifest["apps"]:
+        if app["id"] != app_id:
+            continue
+        for env in app["environments"]:
+            if env["id"] != env_id:
+                continue
+            for route in env["routes"]:
+                if route["id"] != route_id:
+                    continue
+                return route
+    raise ValueError(f"route not found in manifest: {app_id}/{env_id}/{route_id}")
+
+
+def fetch_record_json(url: str) -> dict:
+    req = urllib.request.Request(url, headers={"Accept": "application/json"})
+    with urllib.request.urlopen(req) as resp:
+        return json.loads(resp.read()).get("record", {})
+
+
+def find_candidate_by_reverse(
+    manifest: dict,
+    app_id: str,
+    env_id: str,
+    route_id: str,
+    via_field: str,
+    match_value: str,
+) -> str:
+    from .url_builder import build_detail_url
+
+    route = get_route_from_manifest(manifest, app_id, env_id, route_id)
+    for candidate_id in route.get("candidates", []):
+        record_url = build_detail_url(route["url_template"], candidate_id)
+        record = fetch_record_json(record_url)
+        if record.get(via_field) == match_value:
+            return candidate_id
+    raise ValueError(
+        f"no record in {app_id}/{env_id}/{route_id} where {via_field}=={match_value!r}"
+    )

@@ -1,9 +1,16 @@
 import pytest
+import yaml
 from pathlib import Path
 
 import jsonschema
 
-from exploration_ta.contracts import SCENARIO_SCHEMA, RUN_RESULT_SCHEMA, validate_scenario_file, validate_run_result
+from exploration_ta.contracts import (
+    SCENARIO_SCHEMA,
+    RUN_RESULT_SCHEMA,
+    validate_multi_step_scenario_file,
+    validate_scenario_file,
+    validate_run_result,
+)
 
 
 def test_scenario_contract_validates_baseline_files() -> None:
@@ -11,7 +18,11 @@ def test_scenario_contract_validates_baseline_files() -> None:
     files = sorted(scenarios_dir.glob("*.yaml"))
     assert files, "expected at least one scenario file"
     for file in files:
-        validate_scenario_file(file)
+        data = yaml.safe_load(file.read_text(encoding="utf-8"))
+        if "steps" in data:
+            validate_multi_step_scenario_file(file)
+        else:
+            validate_scenario_file(file)
 
 
 def test_scenario_contract_accepts_assertions_block() -> None:

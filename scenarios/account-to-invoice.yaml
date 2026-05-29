@@ -1,0 +1,34 @@
+scenario_id: account-to-invoice
+steps:
+  - id: ingest_account
+    app: salesforce
+    env: dev
+    route_id: account-detail
+    lookup:
+      source: manifest
+      strategy: index
+      index: 0
+    assertions:
+      url_contains: /lightning/r/Account/
+
+  - id: enrich_sales_order
+    app: sap
+    env: dev
+    route_id: shell
+    follow:
+      from_step: ingest_account
+      via: reverse
+      via_field: account_id
+    assertions:
+      url_contains: /ushell
+
+  - id: enrich_invoice
+    app: oracle
+    env: dev
+    route_id: invoice-detail
+    follow:
+      from_step: enrich_sales_order
+      via: reverse
+      via_field: order_id
+    assertions:
+      url_contains: /FuseWelcome
