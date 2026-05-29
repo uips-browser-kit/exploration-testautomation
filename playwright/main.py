@@ -229,7 +229,7 @@ def run_multi_step(
         current_url: str = ""
 
         for step in scenario.steps:
-            step_dir = artifact_root / step.id
+            step_dir = artifact_root / step.app
             step_dir.mkdir(parents=True, exist_ok=True)
             screenshot_path = step_dir / "screenshot.png"
 
