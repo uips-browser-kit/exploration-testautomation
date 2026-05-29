@@ -1,0 +1,43 @@
+scenario_id: all-prod-apps
+steps:
+  - id: salesforce
+    app: salesforce
+    env: prod
+    route_id: dashboard
+    assertions:
+      url_contains: /lightning/page/home
+
+  - id: dynamics
+    app: dynamics
+    env: prod
+    route_id: home
+    assertions:
+      url_contains: /home
+
+  - id: servicenow
+    app: servicenow
+    env: prod
+    route_id: home
+    assertions:
+      url_contains: /workspace
+
+  - id: sap
+    app: sap
+    env: prod
+    route_id: home
+    assertions:
+      url_contains: /ushell
+
+  - id: oracle
+    app: oracle
+    env: prod
+    route_id: home
+    assertions:
+      url_contains: /FuseOverview
+
+  - id: workday
+    app: workday
+    env: prod
+    route_id: home
+    assertions:
+      url_contains: /home
