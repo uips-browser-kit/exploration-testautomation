@@ -16,6 +16,7 @@ class Scenario:
     list_url: str
     detail_template: str
     lookup_source: str
+    route_id: str
     selection_strategy: str
     seed: int | None
     index: int | None
@@ -32,6 +33,7 @@ def load_scenario(path: Path) -> Scenario:
         list_url=data["list_url"],
         detail_template=data["detail_template"],
         lookup_source=data["lookup"]["source"],
+        route_id=data["lookup"].get("route_id", ""),
         selection_strategy=data["selection"]["strategy"],
         seed=data["selection"].get("seed"),
         index=data["selection"].get("index"),

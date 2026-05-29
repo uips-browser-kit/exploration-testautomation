@@ -27,7 +27,8 @@ SCENARIO_SCHEMA = {
             "type": "object",
             "required": ["source"],
             "properties": {
-                "source": {"type": "string", "enum": ["api", "cdp", "dom_extract"]}
+                "source": {"type": "string", "enum": ["api", "cdp", "dom_extract", "manifest"]},
+                "route_id": {"type": "string"},
             },
         },
         "selection": {

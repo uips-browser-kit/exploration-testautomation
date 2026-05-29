@@ -2,10 +2,11 @@ scenario_id: salesforce-account-random
 app: salesforce
 env: dev
 list_url: http://salesforce-dev.local/lightning/r/Account/list/view
-detail_template: /lightning/r/Account/{id}/view
+detail_template: http://salesforce-dev.local/lightning/r/Account/{id}/view
 expected_candidate_count: 20
 lookup:
-  source: api
+  source: manifest
+  route_id: account-detail
 selection:
   strategy: random
   seed: 42

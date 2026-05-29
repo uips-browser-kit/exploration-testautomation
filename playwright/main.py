@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from exploration_ta.contracts import validate_run_result, validate_scenario_file
-from exploration_ta.lookup import lookup_candidates
+from exploration_ta.lookup import lookup_candidates, lookup_candidates_from_manifest
 from exploration_ta.scenarios import load_scenario, scenario_candidates
 from exploration_ta.selector import select_candidate
 from exploration_ta.url_builder import build_detail_url
@@ -40,7 +40,7 @@ def _resolve_url(detail_path: str, list_url: str) -> str:
     return f"{parsed.scheme}://{parsed.netloc}{detail_path}"
 
 
-def run(scenario_path: Path, headless: bool = True) -> int:
+def run(scenario_path: Path, headless: bool = True, manifest_url: str = "http://harness.local/manifest") -> int:
     # load + validate — fail-fast, no result.json written on contract errors
     try:
         validate_scenario_file(scenario_path)
@@ -79,8 +79,15 @@ def run(scenario_path: Path, headless: bool = True) -> int:
 
     # lookup
     try:
-        candidates = scenario_candidates()
-        lookup_result = lookup_candidates(scenario.lookup_source, candidates)
+        if scenario.lookup_source == "manifest":
+            if not scenario.route_id:
+                return _fail("lookup", "manifest source requires route_id in scenario")
+            lookup_result = lookup_candidates_from_manifest(
+                manifest_url, scenario.app, scenario.env, scenario.route_id
+            )
+        else:
+            candidates = scenario_candidates()
+            lookup_result = lookup_candidates(scenario.lookup_source, candidates)
     except Exception as exc:
         return _fail("lookup", str(exc))
 
@@ -182,7 +189,8 @@ def main() -> None:
     args = parser.parse_args()
     config = _load_config()
     headless = _resolve_headless(args.headless, config)
-    sys.exit(run(args.scenario, headless=headless))
+    manifest_url = config.get("manifest_url", "http://harness.local/manifest")
+    sys.exit(run(args.scenario, headless=headless, manifest_url=manifest_url))
 
 
 if __name__ == "__main__":
