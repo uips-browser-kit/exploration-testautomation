@@ -1,11 +1,14 @@
 # exploration-testautomation
 
-Reference browser automation implementations against `testharness-webapps`.
+Reference browser automation implementations against `testharness-webapps` to inform selective re-implementation in UiPath RPA.
+
+## Vision
+See [docs/vision.md](docs/vision.md) for the project vision, scope, and success criteria.
 
 ## Goals
-- Browser-first navigation reference flows
-- Framework parity across Playwright, Puppeteer, Selenium
-- Screenshot capture artifacts for scenarios
+- Showcase equivalent browser flows in Playwright, Puppeteer, and Selenium
+- Document patterns that map cleanly to UiPath RPA activities
+- Keep scenario inputs and outputs comparable across implementations
 
 ## Structure
 - `playwright/`, `puppeteer/`, `selenium/`: framework-specific implementations

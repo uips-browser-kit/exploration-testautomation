@@ -17,6 +17,9 @@ dependencies = [
 dev = [
     "pytest>=8.2.0",
 ]
+playwright = [
+    "playwright>=1.40",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

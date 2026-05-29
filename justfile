@@ -21,3 +21,7 @@ check: lint fmt
 
 test:
     uv run pytest
+
+# Run a scenario with the Playwright adapter
+playwright scenario:
+    uv run python playwright/main.py {{ scenario }}
