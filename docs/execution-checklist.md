@@ -2,6 +2,40 @@
 
 Reference: [Tracking issue #1](https://github.com/uips-browser-kit/exploration-testautomation/issues/1)
 
+## Solution Design Baseline
+
+### A. Problem framing
+- [ ] [#33 Design baseline A: Problem framing](https://github.com/uips-browser-kit/exploration-testautomation/issues/33)
+
+### B. Architecture boundaries
+- [ ] [#34 Design baseline B: Architecture boundaries](https://github.com/uips-browser-kit/exploration-testautomation/issues/34)
+
+### C. Contract-first design
+- [ ] [#35 Design baseline C: Contract-first design](https://github.com/uips-browser-kit/exploration-testautomation/issues/35)
+
+### D. Scenario model design
+- [ ] [#36 Design baseline D: Scenario model design](https://github.com/uips-browser-kit/exploration-testautomation/issues/36)
+
+### E. Execution pipeline design
+- [ ] [#37 Design baseline E: Execution pipeline design](https://github.com/uips-browser-kit/exploration-testautomation/issues/37)
+
+### F. Reliability and failure strategy
+- [ ] [#38 Design baseline F: Reliability and failure strategy](https://github.com/uips-browser-kit/exploration-testautomation/issues/38)
+
+### G. Observability and artifacts
+- [ ] [#39 Design baseline G: Observability and artifacts](https://github.com/uips-browser-kit/exploration-testautomation/issues/39)
+
+### H. Parity design across frameworks
+- [ ] [#40 Design baseline H: Parity design across frameworks](https://github.com/uips-browser-kit/exploration-testautomation/issues/40)
+
+### I. Test strategy design
+- [ ] [#41 Design baseline I: Test strategy design](https://github.com/uips-browser-kit/exploration-testautomation/issues/41)
+
+### J. Change management
+- [ ] [#42 Design baseline J: Change management](https://github.com/uips-browser-kit/exploration-testautomation/issues/42)
+
+## Delivery Tracking (Issue-backed)
+
 ## 1. Finalize contracts
 - [ ] [#2 Define scenario contract specification](https://github.com/uips-browser-kit/exploration-testautomation/issues/2)
 - [ ] [#3 Define run-result JSON contract](https://github.com/uips-browser-kit/exploration-testautomation/issues/3)
