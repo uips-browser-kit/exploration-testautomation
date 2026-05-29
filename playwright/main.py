@@ -197,6 +197,7 @@ def run_multi_step(
     scenario_path: Path,
     headless: bool = True,
     manifest_url: str = "http://harness.local/manifest",
+    keep_open: bool = False,
 ) -> int:
     try:
         validate_multi_step_scenario_file(scenario_path)
@@ -223,7 +224,7 @@ def run_multi_step(
     print(f"launching browser  headless={headless}")
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=headless)
-        page = browser.new_page()
+        contexts: list = []
 
         current_id: str = ""
         current_url: str = ""
@@ -232,6 +233,10 @@ def run_multi_step(
             step_dir = artifact_root / step.app
             step_dir.mkdir(parents=True, exist_ok=True)
             screenshot_path = step_dir / "screenshot.png"
+
+            ctx = browser.new_context()
+            contexts.append(ctx)
+            page = ctx.new_page()
 
             def _fail_step(message: str, *, screenshot: bool = False) -> dict:
                 return {
@@ -244,10 +249,13 @@ def run_multi_step(
                     "error": message,
                 }
 
-            # resolve candidate ID for this step
+            # resolve URL for this step
             try:
-                if step.follow is None:
-                    # first step — manifest lookup + selection
+                route = get_route_from_manifest(manifest, step.app, step.env, step.route_id)
+                if route.get("kind") == "template-only":
+                    detail_url = route["url"]
+                    candidate_id = ""
+                elif step.follow is None:
                     lookup_result = lookup_candidates_from_manifest(
                         manifest_url, step.app, step.env, step.route_id
                     )
@@ -263,6 +271,7 @@ def run_multi_step(
                         index=lookup_cfg.get("index"),
                     )
                     candidate_id = selection.candidate.id
+                    detail_url = build_detail_url(route["url_template"], candidate_id)
                 elif step.follow["via"] == "field":
                     record = fetch_record_json(current_url)
                     via_field = step.follow["via_field"]
@@ -271,22 +280,15 @@ def run_multi_step(
                         entry = _fail_step(f"field '{via_field}' missing or empty in record at {current_url}")
                         step_results.append(entry)
                         break
+                    detail_url = build_detail_url(route["url_template"], candidate_id)
                 else:  # via: reverse
                     via_field = step.follow["via_field"]
                     candidate_id = find_candidate_by_reverse(
                         manifest, step.app, step.env, step.route_id, via_field, current_id
                     )
+                    detail_url = build_detail_url(route["url_template"], candidate_id)
             except Exception as exc:
                 entry = _fail_step(f"lookup: {exc}")
-                step_results.append(entry)
-                break
-
-            # build URL
-            try:
-                route = get_route_from_manifest(manifest, step.app, step.env, step.route_id)
-                detail_url = build_detail_url(route["url_template"], candidate_id)
-            except Exception as exc:
-                entry = _fail_step(f"build_url: {exc}")
                 step_results.append(entry)
                 break
 
@@ -335,6 +337,14 @@ def run_multi_step(
             current_url = detail_url
             print(f"ok  {step.id}  {detail_url}")
 
+        if keep_open and not headless:
+            try:
+                input("all windows open — press Enter to close")
+            except EOFError:
+                pass
+
+        for ctx in contexts:
+            ctx.close()
         browser.close()
 
     overall_ok = all(s["ok"] for s in step_results) and len(step_results) == len(scenario.steps)
@@ -363,13 +373,19 @@ def main() -> None:
         default=None,
         help="Run browser headless (overrides config file; default: true)",
     )
+    parser.add_argument(
+        "--keep-open",
+        action="store_true",
+        default=False,
+        help="Keep browser windows open after all steps complete (non-headless only)",
+    )
     args = parser.parse_args()
     config = _load_config()
     headless = _resolve_headless(args.headless, config)
     manifest_url = config.get("manifest_url", "http://harness.local/manifest")
     data = yaml.safe_load(args.scenario.read_text(encoding="utf-8"))
     if "steps" in data:
-        sys.exit(run_multi_step(args.scenario, headless=headless, manifest_url=manifest_url))
+        sys.exit(run_multi_step(args.scenario, headless=headless, manifest_url=manifest_url, keep_open=args.keep_open))
     else:
         sys.exit(run(args.scenario, headless=headless, manifest_url=manifest_url))
 
