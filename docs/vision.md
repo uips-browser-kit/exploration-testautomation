@@ -1,41 +1,58 @@
 # Vision
 
-## Purpose
-Provide a practical showcase of Playwright, Puppeteer, and Selenium implementations for the same browser scenarios, as a reference for what should be re-implemented in UiPath RPA when it is reasonable.
+## The claim
 
-## Problem
-UiPath teams need concrete, side-by-side reference flows to decide:
-- what should be translated directly into UiPath workflows,
-- what should stay in code-based automation,
-- and where behavior or reliability differs across frameworks.
+Test automation frameworks such as Playwright, Puppeteer, and Selenium have capabilities
+that RPA tools currently lack or implement poorly — robust URL construction from dynamic
+lookups, deterministic record selection, structured result capture, and reliable
+multi-system navigation.
 
-Without these references, re-implementation decisions are subjective and harder to validate.
+This repo proves those capabilities as reference implementations. A UiPath library then
+ports the proven patterns as native activities, giving RPA teams the same robustness
+without leaving the UiPath runtime.
 
-## Direction
-- Implement the same baseline scenarios in each framework with aligned behavior.
-- Use shared scenario contracts so inputs are stable and explicit.
-- Emit consistent run-result data and screenshots for comparison.
-- Annotate implementation decisions with UiPath mapping guidance.
+## What an RPA process looks like
 
-## What "Reasonable Re-implementation" Means
-A flow is a strong UiPath candidate when it is:
-- Stable: selectors and navigation are predictable.
-- Explainable: branching and data handling remain understandable in workflow form.
-- Maintainable: the UiPath version does not introduce disproportionate complexity.
-- Equivalent: expected outcome matches reference behavior within agreed tolerance.
+A typical BPA/RPA process is triggered by a single input (a transaction ID, a queue item)
+and follows a structured sequence of stages across one or more systems:
 
-## v0.1 Outcomes
-- Baseline scenarios and contracts are defined and validated.
-- Reference flows exist in Playwright, Puppeteer, and Selenium.
-- Comparable artifacts are produced per run.
-- Initial guidance is documented on which patterns to port to UiPath first.
+| Stage | Description |
+|---|---|
+| **Initialize** | Open applications, authenticate, establish browser/session state |
+| **Ingest** | Retrieve the transaction item — look up a record by ID in System A |
+| **Enrich** | Augment the item with data from System B or additional sources |
+| **Decide** | Apply business rules to determine what action to take |
+| **Execute** | Perform the action — navigate, create, update, or submit |
+| **Complete** | Capture evidence, record the transaction result, close the item |
+| **Finalize** | Close applications, release resources, report run summary |
 
-## Non-Goals (v0.1)
-- Replacing code frameworks with UiPath entirely.
-- Building full business-process automations.
-- Solving every framework edge case before documenting learnings.
+Each stage may involve navigating to a specific URL, reading or writing data, and
+capturing structured evidence.
 
-## Success Criteria
-- For each baseline scenario, framework runs are reproducible and comparable.
-- Re-implementation guidance can cite concrete reference runs and artifacts.
-- A new UiPath workflow author can use this repo to choose an implementation approach with less ambiguity.
+## What this repo covers
+
+The testharness implements steps 1 and 2 (read access only). Step 3 is simulated as a
+structured result artifact (`result.json` + `screenshot.png`) because the target
+applications are read-only in the current scope.
+
+The three framework adapters (Playwright, Puppeteer, Selenium) implement the same process
+and produce comparable artifacts. Differences in how each framework handles URL
+construction, navigation, waiting, and assertions are the evidence base for the UiPath
+library design.
+
+## What the UiPath library provides
+
+For each capability proven in the reference implementations, the UiPath library delivers
+an equivalent native activity — so RPA workflows can use the same robust patterns without
+dropping into code-based automation.
+
+Initial capability target: **robust navigate-to with dynamic URL construction** (lookup a
+record ID, build the detail URL from a template, navigate reliably, assert arrival).
+
+Out of scope for v0.1: browser pinning, write-back activities.
+
+## What this repo is not
+
+- A demonstration that RPA should be replaced by test automation frameworks.
+- A queue-processing harness (it processes one transaction at a time, as a process step).
+- A benchmark of framework performance.

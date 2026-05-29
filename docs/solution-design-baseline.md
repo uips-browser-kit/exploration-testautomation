@@ -1,22 +1,27 @@
 # Solution Design Baseline
 
-Locked decisions for the exploration-testautomation repo. Each section maps to the corresponding checklist block in `execution-checklist.md`. Items marked **deferred** are explicitly out of scope for v0.1 and should be tracked as future issues.
+Locked decisions for the exploration-testautomation repo. Items marked **deferred** are explicitly out of scope for v0.1 and should be tracked as future issues.
 
 ---
 
 ## A. Problem framing
 
-**Primary objective:** cross-framework reference implementations for repeatable comparison and re-implementation decisions.
+**Primary objective:** prove browser automation capabilities in test frameworks (Playwright, Puppeteer, Selenium) so those capabilities can be ported as native activities into a UiPath library.
+
+UiPath and other RPA tools lack robust implementations of patterns that test frameworks handle natively — URL construction from dynamic lookups, deterministic record selection, structured result capture, reliable multi-system navigation. This repo provides the reference implementations. The UiPath library is the output.
 
 **Target users:**
-- Automation engineers choosing or evaluating Playwright, Puppeteer, or Selenium
-- Solution designers deciding what a BPA-style flow requires per framework
-- UiPath RPA maintainers deciding what to port and what evidence to produce
+- UiPath library authors who need a proven reference before implementing an activity
+- Automation engineers validating that a capability works consistently across frameworks
+- Solution designers mapping RPA process steps to framework-proven patterns
 
-**Decision outputs this repo must enable:**
-- Is a flow portable across frameworks? — answered by running the same scenario on all three adapters and comparing result.json outputs
-- What assumptions does each implementation require? — answered by adapter-level documentation and the `app`/`env` fields in each scenario
-- What evidence is produced for downstream decisions? — a `result.json` + `screenshot.png` per run, stored under `artifacts/`
+**What the repo must produce per scenario:**
+- A working, repeatable implementation of one navigation capability in each framework
+- Comparable `result.json` + `screenshot.png` artifacts as evidence
+- Visible differences between frameworks that inform the UiPath activity design
+
+**What a scenario represents:**
+A scenario is **one step of an RPA process** — not a full process. A full RPA process spans multiple steps across multiple systems (lookup in System A, enrich from System B, write back to System C). This repo currently covers read-only steps (lookup and navigation). Write-back is simulated as structured output.
 
 ---
 
@@ -73,9 +78,11 @@ Implemented in `src/exploration_ta/selector.py`. Seeded RNG uses Python's `rando
 
 | Class | Description | Example |
 |---|---|---|
-| happy-path-index | Fixed-index selection; fully deterministic | `jira-issue-index` |
-| happy-path-random | Seeded random selection; replay-safe | `salesforce-account-random` |
+| happy-path-index | Fixed-index selection; fully deterministic; used for development and replay | `jira-issue-index` |
+| happy-path-random | Seeded random selection; replay-safe; used for sampling | `salesforce-account-random` |
 | negative-path | Invalid input or unreachable source; expected failure | not yet in `scenarios/` |
+
+Selection strategy (`index`, `random`) is a **development and debug tool** — it controls which transaction item is exercised in a given run. In a production RPA process the dispatcher or orchestrator supplies the item; selection is not the adapter's concern.
 
 ### Naming convention
 
@@ -84,6 +91,10 @@ Implemented in `src/exploration_ta/selector.py`. Seeded RNG uses Python's `rando
 Examples: `jira-issue-index`, `salesforce-account-random`, `github-pr-random`.
 
 The `scenario_id` value must match the filename without the `.yaml` extension.
+
+### Relationship to RPA process steps
+
+Each scenario proves one navigation capability (e.g. "navigate to a Jira issue detail page given a dynamic ID"). Multiple scenarios compose into a full RPA process: one scenario per system, chained by the process orchestrator. This repo does not yet model that chaining — each scenario runs independently.
 
 ### Assumption fields
 
@@ -259,8 +270,8 @@ Before any merge that touches `contracts.py`:
 Before merging a new scenario YAML:
 - [ ] `scenario_id` matches the filename (without `.yaml`)
 - [ ] File passes `validate_scenario_file()` (run `just test`)
-- [ ] Strategy/app combination is distinct from existing scenarios
-- [ ] Scenario is listed in `docs/execution-checklist.md`
+- [ ] App/entity/capability combination is distinct from existing scenarios
+- [ ] The capability being proven is documented in the scenario or its linked GitHub issue
 
 ### Backward compatibility
 
