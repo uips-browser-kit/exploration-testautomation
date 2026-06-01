@@ -22,6 +22,10 @@ check: lint fmt
 test:
     uv run pytest
 
+# Install dependencies (uv add syncs pyproject.toml into the shared venv)
+install:
+    uv add playwright
+
 # Run a scenario with the Playwright adapter
 playwright scenario *args:
     uv run python playwright/main.py {{ scenario }} {{ args }}

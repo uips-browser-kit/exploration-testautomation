@@ -1,2 +1,2 @@
 headless: true
-manifest_url: http://harness.local/manifest
+manifest_url: http://harness.local/api/v0.1/manifest
