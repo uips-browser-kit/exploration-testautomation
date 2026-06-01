@@ -26,6 +26,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "jsonschema" },
+    { name = "playwright" },
     { name = "pyyaml" },
 ]
 
@@ -40,6 +41,7 @@ playwright = [
 [package.metadata]
 requires-dist = [
     { name = "jsonschema", specifier = ">=4.22.0" },
+    { name = "playwright", specifier = ">=1.40" },
     { name = "playwright", marker = "extra == 'playwright'", specifier = ">=1.40" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.2.0" },
     { name = "pyyaml", specifier = ">=6.0.2" },
